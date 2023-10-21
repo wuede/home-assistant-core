@@ -6,7 +6,6 @@ import logging
 from typing import Any
 import uuid
 
-from pyatmo.const import ALL_SCOPES
 import voluptuous as vol
 
 from homeassistant import config_entries
@@ -26,6 +25,7 @@ from .const import (
     CONF_WEATHER_AREAS,
     DOMAIN,
 )
+from .pyatmo.const import ALL_SCOPES
 
 _LOGGER = logging.getLogger(__name__)
 

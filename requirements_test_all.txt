@@ -1041,6 +1041,9 @@ numpy==1.26.0
 # homeassistant.components.google
 oauth2client==4.1.3
 
+# homeassistant.components.netatmo
+oauthlib==3.1.1
+
 # homeassistant.components.profiler
 objgraph==3.5.0
 
@@ -1213,9 +1216,6 @@ pyairvisual==2023.08.1
 
 # homeassistant.components.atag
 pyatag==0.3.5.3
-
-# homeassistant.components.netatmo
-pyatmo==7.5.0
 
 # homeassistant.components.apple_tv
 pyatv==0.14.3
@@ -1731,6 +1731,9 @@ renson-endura-delta==1.6.0
 
 # homeassistant.components.reolink
 reolink-aio==0.7.12
+
+# homeassistant.components.netatmo
+requests_oauthlib==1.3.1
 
 # homeassistant.components.rflink
 rflink==0.0.65

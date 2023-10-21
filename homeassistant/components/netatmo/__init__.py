@@ -7,8 +7,6 @@ import secrets
 from typing import Any
 
 import aiohttp
-import pyatmo
-from pyatmo.const import ALL_SCOPES as NETATMO_SCOPES
 import voluptuous as vol
 
 from homeassistant.components import cloud
@@ -41,7 +39,7 @@ from homeassistant.helpers.issue_registry import IssueSeverity, async_create_iss
 from homeassistant.helpers.start import async_at_started
 from homeassistant.helpers.typing import ConfigType
 
-from . import api
+from . import api, pyatmo
 from .const import (
     AUTH,
     CONF_CLOUDHOOK_URL,
@@ -58,6 +56,7 @@ from .const import (
     WEBHOOK_PUSH_TYPE,
 )
 from .data_handler import NetatmoDataHandler
+from .pyatmo.const import ALL_SCOPES as NETATMO_SCOPES
 from .webhook import async_handle_webhook
 
 _LOGGER = logging.getLogger(__name__)

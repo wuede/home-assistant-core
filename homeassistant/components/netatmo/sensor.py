@@ -5,8 +5,6 @@ from dataclasses import dataclass
 import logging
 from typing import cast
 
-import pyatmo
-
 from homeassistant.components.sensor import (
     SensorDeviceClass,
     SensorEntity,
@@ -37,6 +35,7 @@ from homeassistant.helpers.dispatcher import (
 )
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 
+from . import pyatmo
 from .const import (
     CONF_URL_ENERGY,
     CONF_URL_PUBLIC_WEATHER,

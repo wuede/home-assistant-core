@@ -2,9 +2,10 @@
 from typing import cast
 
 from aiohttp import ClientSession
-import pyatmo
 
 from homeassistant.helpers import config_entry_oauth2_flow
+
+from . import pyatmo
 
 
 class AsyncConfigEntryNetatmoAuth(pyatmo.AbstractAsyncAuth):

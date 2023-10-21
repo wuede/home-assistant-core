@@ -4,8 +4,6 @@ from __future__ import annotations
 import logging
 from typing import Any, cast
 
-from pyatmo import modules as NaModules
-
 from homeassistant.components.light import ATTR_BRIGHTNESS, ColorMode, LightEntity
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant, callback
@@ -24,6 +22,7 @@ from .const import (
 )
 from .data_handler import HOME, SIGNAL_NAME, NetatmoDevice
 from .netatmo_entity_base import NetatmoBase
+from .pyatmo import modules as NaModules
 
 _LOGGER = logging.getLogger(__name__)
 

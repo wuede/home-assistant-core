@@ -10,9 +10,6 @@ import logging
 from time import time
 from typing import Any
 
-import pyatmo
-from pyatmo.modules.device_types import DeviceCategory as NetatmoDeviceCategory
-
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import CALLBACK_TYPE, HomeAssistant, callback
 from homeassistant.helpers.dispatcher import (
@@ -21,6 +18,7 @@ from homeassistant.helpers.dispatcher import (
 )
 from homeassistant.helpers.event import async_track_time_interval
 
+from . import pyatmo
 from .const import (
     AUTH,
     DATA_PERSONS,
@@ -44,6 +42,7 @@ from .const import (
     WEBHOOK_NACAMERA_CONNECTION,
     WEBHOOK_PUSH_TYPE,
 )
+from .pyatmo.modules.device_types import DeviceCategory as NetatmoDeviceCategory
 
 _LOGGER = logging.getLogger(__name__)
 

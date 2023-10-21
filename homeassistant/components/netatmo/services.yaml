@@ -26,6 +26,29 @@ set_schedule:
       selector:
         text:
 
+set_scheduled_room_temperature:
+  target:
+    entity:
+      integration: netatmo
+      domain: climate
+  fields:
+    zone_name:
+      required: true
+      selector:
+        select:
+          options:
+            - Eco
+            - Comfort
+            - Comfort+
+            - Night
+    temperature:
+      example: 20
+      required: true
+      selector:
+        number:
+          min: 10
+          max: 30
+
 set_persons_home:
   target:
     entity:

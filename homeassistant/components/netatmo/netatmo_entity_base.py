@@ -3,11 +3,6 @@ from __future__ import annotations
 
 from typing import Any
 
-from pyatmo.modules.device_types import (
-    DEVICE_DESCRIPTION_MAP,
-    DeviceType as NetatmoDeviceType,
-)
-
 from homeassistant.core import callback
 from homeassistant.helpers import device_registry as dr
 from homeassistant.helpers.device_registry import DeviceInfo
@@ -15,6 +10,10 @@ from homeassistant.helpers.entity import Entity
 
 from .const import DATA_DEVICE_IDS, DEFAULT_ATTRIBUTION, DOMAIN, SIGNAL_NAME
 from .data_handler import PUBLIC, NetatmoDataHandler
+from .pyatmo.modules.device_types import (
+    DEVICE_DESCRIPTION_MAP,
+    DeviceType as NetatmoDeviceType,
+)
 
 
 class NetatmoBase(Entity):

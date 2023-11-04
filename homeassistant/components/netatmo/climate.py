@@ -465,42 +465,6 @@ class NetatmoThermostat(NetatmoBase, ClimateEntity):
         self, **kwargs: Any
     ) -> None:
         temperature = kwargs.get(ATTR_TEMPERATURE)
-        zone_name = kwargs.get("zone")
-
-        schedule = self._get_active_schedule()
-        if not schedule:
-            _LOGGER.error("Could not determine active schedule")
-            return
-
-        selected_zone = None
-        for zone in schedule.zones:
-            if zone.name == zone_name:
-                selected_zone = zone
-                break
-
-        if not selected_zone:
-            _LOGGER.error("%s is not a valid zone", zone_name)
-            return
-
-        await self._room.home.async_set_schedule_temperatures(
-            zone_id=selected_zone.entity_id, temps={self._room.entity_id: temperature}
-        )
-        _LOGGER.debug(
-            "Setting temperature for room %s to %s for zone %s",
-            self._room.entity_id,
-            temperature,
-            selected_zone.entity_id,
-        )
-        self._attr_target_temperature = temperature
-        self.async_write_ha_state()
-
-    def _get_active_schedule(self) -> Any:
-        return self._room.home.get_selected_schedule()
-
-    async def _async_service_set_scheduled_room_temperature(
-        self, **kwargs: Any
-    ) -> None:
-        temperature = kwargs.get(ATTR_TEMPERATURE)
         zone_name = kwargs.get(ATTR_ZONE_NAME)
 
         schedule = self._get_active_schedule()
@@ -527,49 +491,14 @@ class NetatmoThermostat(NetatmoBase, ClimateEntity):
             temperature,
             selected_zone.entity_id,
         )
+
+        # manually set temperature in home assistant and netatmo
         self._attr_target_temperature = temperature
-        self.async_write_ha_state()
-
-    def _get_active_schedule(self) -> Any:
-        for _, schedule in self.hass.data[DOMAIN][DATA_SCHEDULES][
-            self._room.home.entity_id
-        ].items():
-            if schedule.selected:
-                return schedule
-
-        return None
-
-    async def _async_service_set_scheduled_room_temperature(
-        self, **kwargs: Any
-    ) -> None:
-        temperature = kwargs.get(ATTR_TEMPERATURE)
-        zone_name = kwargs.get(ATTR_ZONE_NAME)
-
-        schedule = self._get_active_schedule()
-        if not schedule:
-            _LOGGER.error("Could not determine active schedule")
-            return
-
-        selected_zone = None
-        for zone in schedule.zones:
-            if zone.name == zone_name:
-                selected_zone = zone
+        for room in selected_zone.rooms:
+            if room.entity_id == self._room.entity_id:
+                room.therm_setpoint_temperature = temperature
                 break
 
-        if not selected_zone:
-            _LOGGER.error("%s is not a valid zone", zone_name)
-            return
-
-        await self._room.home.async_set_schedule_temperatures(
-            zone_id=selected_zone.entity_id, temps={self._room.entity_id: temperature}
-        )
-        _LOGGER.debug(
-            "Setting temperature for room %s to %s for zone %s",
-            self._room.entity_id,
-            temperature,
-            selected_zone.entity_id,
-        )
-        self._attr_target_temperature = temperature
         self.async_write_ha_state()
 
     def _get_active_schedule(self) -> Any:

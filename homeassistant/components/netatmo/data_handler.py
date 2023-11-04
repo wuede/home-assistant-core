@@ -11,8 +11,6 @@ from time import time
 from typing import Any
 
 import aiohttp
-import pyatmo
-from pyatmo.modules.device_types import DeviceCategory as NetatmoDeviceCategory
 
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import CALLBACK_TYPE, HomeAssistant, callback

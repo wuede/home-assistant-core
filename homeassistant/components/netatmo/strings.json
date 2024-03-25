@@ -28,7 +28,9 @@
     "trigger_subtype": {
       "away": "[%key:common::state::not_home%]",
       "hg": "Frost guard",
-      "schedule": "Schedule"
+      "schedule": "Schedule",
+      "temperature": "Temperatures",
+      "zone_name": "Zone name"
     },
     "trigger_type": {
       "alarm_started": "{entity_name} detected an alarm",
@@ -267,6 +269,20 @@
         }
       },
       "name": "Set heating schedule"
+    },
+    "set_scheduled_room_temperature": {
+      "description": "Sets the desired room temperature for the given zone. The zone name must match a zone configured at Netatmo.",
+      "fields": {
+        "temperature": {
+          "description": "Desired room temperature.",
+          "name": "[%key:component::netatmo::device_automation::trigger_subtype::temperature%]"
+        },
+        "zone_name": {
+          "description": "Schedule name.",
+          "name": "[%key:component::netatmo::device_automation::trigger_subtype::zone_name%]"
+        }
+      },
+      "name": "Set scheduled room temperature"
     },
     "set_temperature_with_end_datetime": {
       "description": "Sets the target temperature for a Netatmo climate device with an end date & time.",

@@ -37,6 +37,7 @@
     "set_camera_light": "mdi:led-on",
     "set_schedule": "mdi:calendar-clock",
     "set_preset_mode_with_end_datetime": "mdi:calendar-clock",
+    "set_scheduled_room_temperature": "mdi:thermometer",
     "set_temperature_with_end_datetime": "mdi:thermometer",
     "set_temperature_with_time_period": "mdi:thermometer",
     "clear_temperature_setting": "mdi:thermometer",

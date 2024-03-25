@@ -4,7 +4,7 @@ import probatio
 
 from homeassistant.components.camera import DOMAIN as CAMERA_DOMAIN
 from homeassistant.components.climate import ATTR_PRESET_MODE, DOMAIN as CLIMATE_DOMAIN
-from homeassistant.const import ATTR_PERSONS
+from homeassistant.const import ATTR_PERSONS, ATTR_TEMPERATURE
 from homeassistant.core import HomeAssistant, ServiceCall, callback
 from homeassistant.exceptions import ServiceValidationError
 from homeassistant.helpers import config_validation as cv, issue_registry as ir
@@ -18,6 +18,7 @@ from .const import (
     ATTR_SCHEDULE_NAME,
     ATTR_TARGET_TEMPERATURE,
     ATTR_TIME_PERIOD,
+    ATTR_ZONE_NAME,
     CAMERA_LIGHT_MODES,
     DOMAIN,
     SERVICE_CLEAR_TEMPERATURE_SETTING,
@@ -26,6 +27,7 @@ from .const import (
     SERVICE_SET_PERSONS_HOME,
     SERVICE_SET_PRESET_MODE_WITH_END_DATETIME,
     SERVICE_SET_SCHEDULE,
+    SERVICE_SET_SCHEDULED_ROOM_TEMPERATURE,
     SERVICE_SET_TEMPERATURE_WITH_END_DATETIME,
     SERVICE_SET_TEMPERATURE_WITH_TIME_PERIOD,
 )
@@ -166,4 +168,15 @@ def async_setup_services(hass: HomeAssistant) -> None:
         entity_domain=CLIMATE_DOMAIN,
         func="_async_service_clear_temperature_setting",
         schema=None,
+    )
+    async_register_platform_entity_service(
+        hass,
+        DOMAIN,
+        SERVICE_SET_SCHEDULED_ROOM_TEMPERATURE,
+        entity_domain=CLIMATE_DOMAIN,
+        func="_async_service_set_scheduled_room_temperature",
+        schema={
+            probatio.Required(ATTR_ZONE_NAME): cv.string,
+            probatio.Required(ATTR_TEMPERATURE): probatio.Coerce(float),
+        },
     )

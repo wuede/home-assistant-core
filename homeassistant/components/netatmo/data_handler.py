@@ -44,6 +44,7 @@ from .const import (
     NETATMO_CREATE_SELECT,
     NETATMO_CREATE_SENSOR,
     NETATMO_CREATE_SWITCH,
+    NETATMO_CREATE_TEMPERATURE_SET_ENTRY,
     NETATMO_CREATE_WEATHER_SENSOR,
     PLATFORMS,
     WEBHOOK_ACTIVATION,
@@ -318,6 +319,7 @@ class NetatmoDataHandler:
             await self.subscribe(EVENT, signal_home, None, home_id=home.entity_id)
 
             self.setup_climate_schedule_select(home, signal_home)
+            self.setup_temperature_set_entries(home, signal_home)
             self.setup_rooms(home, signal_home)
             self.setup_modules(home, signal_home)
 
@@ -451,3 +453,68 @@ class NetatmoDataHandler:
                     signal_home,
                 ),
             )
+
+    def setup_temperature_set_entries(
+        self, home: pyatmo.Home, signal_home: str
+    ) -> None:
+        """Set up schedule temperature entities."""
+        # Process temperature sets for each schedule
+        for schedule in self.hass.data[DOMAIN][DATA_SCHEDULES][home.entity_id].values():
+            schedule_id = schedule.entity_id
+            temperature_sets = schedule.zones or []
+
+            for temp_set in temperature_sets:
+                temp_set_id = temp_set.entity_id
+                rooms = temp_set.rooms
+
+                # Dispatch a sensor for each room in the temperature set
+                for room in rooms:
+                    async_dispatcher_send(
+                        self.hass,
+                        NETATMO_CREATE_TEMPERATURE_SET_ENTRY,
+                        NetatmoHome(
+                            self,
+                            home,
+                            home.entity_id,
+                            signal_home,
+                        ),
+                        {
+                            "schedule_id": schedule_id,
+                            "temp_set_id": temp_set_id,
+                            "room_id": room.entity_id,
+                        },
+                        self.update_schedule,  # Pass the update callback
+                    )
+
+    def update_schedule(
+        self,
+        home_id: str,
+        schedule_id: str,
+        temp_set_id: str,
+        room_id: str,
+        new_temperature: float,
+    ) -> None:
+        """Update the schedule with the new temperature."""
+        if not (home := self.account.homes.get(home_id)):
+            _LOGGER.error("Home %s not found", home_id)
+            return
+
+        if not (schedule := home.schedules.get(schedule_id)):
+            _LOGGER.error("Schedule %s not found in home %s", schedule_id, home_id)
+            return
+
+        # Update the room temperature in the schedule
+        for temperature_set in schedule.zones:
+            if temperature_set.entity_id == temp_set_id:
+                for room in temperature_set.rooms:
+                    if room.entity_id == room_id:
+                        room.therm_setpoint_temperature = new_temperature
+                        _LOGGER.debug(
+                            "Updated temperature for room %s in temperature set %s and schedule %s to %s°C",
+                            room_id,
+                            temp_set_id,
+                            schedule_id,
+                            new_temperature,
+                        )
+                        break
+                break

@@ -498,6 +498,12 @@
                     "room_id": "2746182631"
                   }
                 ],
+                "rooms": [
+                  {
+                    "therm_setpoint_temperature": 21,
+                    "id": "2746182631"
+                  }
+                ],
                 "id": 0
               },
               {
@@ -509,6 +515,12 @@
                     "room_id": "2746182631"
                   }
                 ],
+                "rooms": [
+                  {
+                    "therm_setpoint_temperature": 17,
+                    "id": "2746182631"
+                  }
+                ],
                 "id": 1
               },
               {
@@ -518,6 +530,12 @@
                   {
                     "temp": 17,
                     "room_id": "2746182631"
+                  }
+                ],
+                "rooms": [
+                  {
+                    "therm_setpoint_temperature": 17,
+                    "id": "2746182631"
                   }
                 ],
                 "id": 4
@@ -643,6 +661,12 @@
                     "room_id": "2746182631"
                   }
                 ],
+                "rooms": [
+                  {
+                    "therm_setpoint_temperature": 21,
+                    "id": "2746182631"
+                  }
+                ],
                 "id": 0
               },
               {
@@ -654,6 +678,12 @@
                     "room_id": "2746182631"
                   }
                 ],
+                "rooms": [
+                  {
+                    "therm_setpoint_temperature": 17,
+                    "id": "2746182631"
+                  }
+                ],
                 "id": 1
               },
               {
@@ -663,6 +693,12 @@
                   {
                     "temp": 17,
                     "room_id": "2746182631"
+                  }
+                ],
+                "rooms": [
+                  {
+                    "therm_setpoint_temperature": 17,
+                    "id": "2746182631"
                   }
                 ],
                 "id": 4

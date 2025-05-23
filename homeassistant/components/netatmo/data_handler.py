@@ -44,6 +44,7 @@ from .const import (
     NETATMO_CREATE_SELECT,
     NETATMO_CREATE_SENSOR,
     NETATMO_CREATE_SWITCH,
+    NETATMO_CREATE_TEMPERATURE_SET,
     NETATMO_CREATE_WEATHER_SENSOR,
     PLATFORMS,
     WEBHOOK_ACTIVATION,
@@ -362,6 +363,7 @@ class NetatmoDataHandler:
             await self.subscribe(EVENT, signal_home, None, home_id=home.entity_id)
 
             self.setup_climate_schedule_select(home, signal_home)
+            self.setup_temperature_set_numbers(home)
             self.setup_rooms(home, signal_home)
             self.setup_modules(home, signal_home)
 
@@ -495,6 +497,85 @@ class NetatmoDataHandler:
                     signal_home,
                 ),
             )
+
+    def setup_temperature_set_numbers(self, home: pyatmo.Home) -> None:
+        """Set up temperature set numbers."""
+
+        # Process temperature sets for each schedule
+        schedules = self.hass.data[DOMAIN][DATA_SCHEDULES].get(home.entity_id, {})
+        for schedule in schedules.values():
+            schedule_id = schedule.entity_id
+            schedule_name = schedule.name
+            temperature_sets = schedule.zones or []
+
+            for temp_set in temperature_sets:
+                temp_set_id = temp_set.entity_id
+                temp_set_name = temp_set.name
+
+                rooms = temp_set.rooms
+
+                # Dispatch a sensor for each room in the temperature set
+                for room in rooms:
+                    room_id = room.entity_id
+                    # Look up the room in the pyatmo.Home object to get additional attributes
+                    full_room = home.rooms.get(room_id)
+
+                    if not full_room:
+                        _LOGGER.error(
+                            "Room %s not found in home %s", room_id, home.entity_id
+                        )
+                        continue
+
+                    room_name = full_room.name
+                    target_temperature = room.therm_setpoint_temperature
+
+                    async_dispatcher_send(
+                        self.hass,
+                        NETATMO_CREATE_TEMPERATURE_SET,
+                        {
+                            "home_id": home.entity_id,
+                            "schedule_id": schedule_id,
+                            "schedule_name": schedule_name,
+                            "temp_set_id": temp_set_id,
+                            "temp_set_name": temp_set_name,
+                            "room_id": room_id,
+                            "room_name": room_name,
+                            "therm_setpoint_temperature": target_temperature,
+                        },
+                        self.update_schedule,  # Pass the update callback
+                    )
+
+    def update_schedule(
+        self,
+        home_id: str,
+        schedule_id: str,
+        temp_set_id: str,
+        room_id: str,
+        new_temperature: float,
+    ) -> None:
+        """Update the schedule with the new temperature."""
+        if not (home := self.account.homes.get(home_id)):
+            _LOGGER.error("Home %s not found", home_id)
+            return
+
+        if not (schedule := home.schedules.get(schedule_id)):
+            _LOGGER.error("Schedule %s not found in home %s", schedule_id, home_id)
+            return
+
+        # Update the room temperature in the schedule
+        for temperature_set in schedule.zones:
+            if temperature_set.entity_id == temp_set_id:
+                for room in temperature_set.rooms:
+                    if room.entity_id == room_id:
+                        room.therm_setpoint_temperature = new_temperature
+                        _LOGGER.debug(
+                            "Updated temperature for room %s in temperature set %s and schedule %s to %s°C",
+                            room_id,
+                            temp_set_id,
+                            schedule_id,
+                            new_temperature,
+                        )
+                        break
 
     async def sync_schedule(self, home_id: str, schedule_id: str) -> None:
         """Sync the schedule with the Netatmo API."""

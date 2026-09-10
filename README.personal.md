@@ -20,7 +20,9 @@ This updates the branch base while preserving the commits that belong to `dev-pe
 
 ## Netatmo custom component
 
-The Netatmo changes were rejected upstream, so they are not part of `dev-personal`. They live on one branch per release tag, `feature/<tag>-netatmo-custom`, and are installed as a custom component. The most recent one is `feature/2026.9.1-netatmo-custom` (commit `21f10c2e9df`, based on tag `2026.9.1`).
+The Netatmo changes were rejected upstream, so they are deliberately not part of `dev-personal` — keeping them out avoids ever carrying them into an upstream pull request. They live on one branch per release tag, `feature/<tag>-netatmo-custom`, and are installed as a custom component. `netatmo-custom` is a moving pointer to the newest of those branches, so it is always the commit to cherry-pick from. It currently points at `feature/2026.9.1-netatmo-custom` (commit `21f10c2e9df`, based on tag `2026.9.1`).
+
+The pointer is never rebased onto `dev`: the patch is always applied to a release tag, which is behind `dev`, so keeping its context on the previous release minimises conflicts.
 
 ### Patching a new release
 
@@ -28,7 +30,7 @@ The Netatmo changes were rejected upstream, so they are not part of `dev-persona
 git fetch upstream --tags
 git tag -l | grep -E '^20[0-9]{2}\.[0-9]+\.[0-9]+$' | sort -V | tail -1  # latest stable tag
 git checkout -b feature/<tag>-netatmo-custom <tag>
-git cherry-pick <tip commit of the previous feature/*-netatmo-custom branch>
+git cherry-pick netatmo-custom
 ```
 
 Conflicts are usually limited to the `from .const import (...)` block in `climate.py`; keep the added names and drop imports upstream has removed. Then verify:
@@ -36,6 +38,13 @@ Conflicts are usually limited to the `from .const import (...)` block in `climat
 ```sh
 uv run --no-sync prek run --files homeassistant/components/netatmo/*
 uv run --no-sync pytest tests/components/netatmo
+```
+
+Finally move the pointer to the new branch:
+
+```sh
+git branch -f netatmo-custom feature/<tag>-netatmo-custom
+git push --force-with-lease origin netatmo-custom
 ```
 
 ### What the patch changes

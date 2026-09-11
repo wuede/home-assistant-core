@@ -1,6 +1,8 @@
-# `dev-personal`
+# `netatmo-customization`
 
-This branch contains personal development setup changes for the Home Assistant Core fork. It is based on the official repository's `dev` branch and is intended to remain in the fork rather than being submitted upstream.
+This branch carries the fork-only changes of this Home Assistant Core setup: the tooling and documentation for the Netatmo custom component, plus the devcontainer tweaks this environment needs. It is based on the official repository's `dev` branch and is meant to stay in the fork rather than be submitted upstream.
+
+It is not a starting point for feature development. Branch feature work off `upstream/dev` so it carries none of these changes.
 
 The remotes are used as follows:
 
@@ -9,18 +11,18 @@ The remotes are used as follows:
 
 ## Update from `upstream/dev`
 
-Before starting development, make sure local changes are committed or stashed, then run:
+Make sure local changes are committed or stashed, then run:
 
 ```sh
 git fetch upstream dev
 git rebase upstream/dev
 ```
 
-This updates the branch base while preserving the commits that belong to `dev-personal`. Resolve any conflicts during the rebase before continuing. Push the rebased branch to your fork with `git push --force-with-lease origin dev-personal` if it has already been published there. If the rebase aborts because of `.devcontainer/devcontainer.json`, see the recovery steps below.
+This updates the branch base while preserving the commits that belong to `netatmo-customization`. Resolve any conflicts during the rebase before continuing — `.devcontainer/devcontainer.json` is the likely one, since it is modified here and maintained upstream; keep the upstream edits and re-apply the personal additions listed below. Push the rebased branch to your fork with `git push --force-with-lease origin netatmo-customization` if it has already been published there.
 
 ## Netatmo custom component
 
-The Netatmo changes were rejected upstream, so they are deliberately not part of `dev-personal` — keeping them out avoids ever carrying them into an upstream pull request. They live on one branch per release tag, `feature/<tag>-netatmo-custom`, and are installed as a custom component. `netatmo-custom` is a moving pointer to the newest of those branches, so it is always the commit to cherry-pick from. It currently points at `feature/2026.9.1-netatmo-custom` (commit `21f10c2e9df`, based on tag `2026.9.1`).
+The Netatmo changes were rejected upstream, so they are deliberately not part of this branch — keeping them out avoids ever carrying them into an upstream pull request. They live on one branch per release tag, `feature/<tag>-netatmo-custom`, and are installed as a custom component. `netatmo-custom` is a moving pointer to the newest of those branches, so it is always the commit to cherry-pick from. It currently points at `feature/2026.9.1-netatmo-custom` (commit `21f10c2e9df`, based on tag `2026.9.1`).
 
 The pointer is never rebased onto `dev`: the patch is always applied to a release tag, which is behind `dev`, so keeping its context on the previous release minimises conflicts.
 
@@ -73,23 +75,15 @@ The script refuses to install a branch whose `const.py` lacks `SERVICE_SET_SCHED
 
 Useful options: `--branch` and `--version` to override the defaults, `--yes` to skip the prompt, `--restart` to run `ha core restart` afterwards (otherwise restart Home Assistant manually). The SSH target and the Home Assistant home directory default to the personal setup and can be overridden with the `HA_SSH_HOST`, `HA_SSH_PORT` and `HA_HOME` environment variables (`CORE_REMOTE` picks the git remote to look for the branch on). Authentication is left to the SSH agent, so the key must be loaded (`ssh-add -l`) before running the script.
 
-## Local-only devcontainer changes
+## Devcontainer changes
 
-`.devcontainer/devcontainer.json` is tracked upstream, but this environment adds `CLAUDE_CONFIG_DIR`, a read-only bind mount of `~/.aws`, a volume for `/home/vscode/.claude`, and the `anthropic.claude-code` extension. Committing them conflicts on every rebase, so they live in the working tree only, hidden from git with:
+`.devcontainer/devcontainer.json` is tracked upstream and modified here, committed on this branch so a rebuilt or freshly cloned container gets the setup without any manual step. The additions are:
 
-```sh
-git update-index --skip-worktree .devcontainer/devcontainer.json
-```
+- `CLAUDE_CONFIG_DIR` pointing at `/home/vscode/.claude`, so `.claude.json` lands in the mounted volume and survives rebuilds
+- a read-only bind mount of `~/.aws`
+- a `claude-code-config-${devcontainerId}` volume for `/home/vscode/.claude`
+- the `anthropic.claude-code` extension
 
 Claude's Bedrock variables (`CLAUDE_CODE_USE_BEDROCK`, `AWS_REGION`, `AWS_PROFILE`) are deliberately not in this file; they live in `~/.claude/settings.json`, which persists in the `claude-code-config-*` volume across rebuilds.
 
-Git refuses to overwrite a `skip-worktree` file, so a rebase that touches `devcontainer.json` stops with `Entry '...' not uptodate. Cannot merge.` <!-- codespell:ignore uptodate --> To recover:
-
-```sh
-cp .devcontainer/devcontainer.json /tmp/devcontainer.personal.json
-git update-index --no-skip-worktree .devcontainer/devcontainer.json
-git checkout -- .devcontainer/devcontainer.json  # discards the working tree version
-git rebase upstream/dev
-# Re-apply the personal lines by hand to keep genuine upstream changes, then hide them again:
-git update-index --skip-worktree .devcontainer/devcontainer.json
-```
+Feature branches must not inherit these edits, which is the other reason this branch is not a base for feature work.

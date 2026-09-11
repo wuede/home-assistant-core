@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Install the patched netatmo integration as a custom component on Home Assistant.
 #
-# See README.personal.md for how the feature/<tag>-netatmo-custom branches are maintained.
+# See README.netatmo-customization.md for how the feature/<tag>-netatmo-custom branches are maintained.
 set -euo pipefail
 
 HA_SSH_HOST="${HA_SSH_HOST:-hassio@oberiberg.internet-box.ch}"

@@ -9,7 +9,10 @@
   "containerEnv": {
     "PYTHONASYNCIODEBUG": "1",
     // Keeps .claude.json inside the mounted volume so it survives rebuilds
-    "CLAUDE_CONFIG_DIR": "/home/vscode/.claude"
+    "CLAUDE_CONFIG_DIR": "/home/vscode/.claude",
+    "CLAUDE_CODE_USE_BEDROCK": "1",
+    "AWS_REGION": "eu-central-1",
+    "AWS_PROFILE": "claude-code"
   },
   "features": {
     "ghcr.io/devcontainers/features/github-cli:1": {}

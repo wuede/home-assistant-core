@@ -74,16 +74,3 @@ Before overwriting, the existing directory is archived to `netatmo-backups/netat
 The script refuses to install a branch whose `const.py` lacks `SERVICE_SET_SCHEDULED_ROOM_TEMPERATURE`, which catches a cherry-pick that silently dropped the patch.
 
 Useful options: `--branch` and `--version` to override the defaults, `--yes` to skip the prompt, `--restart` to run `ha core restart` afterwards (otherwise restart Home Assistant manually). The SSH target and the Home Assistant home directory default to the personal setup and can be overridden with the `HA_SSH_HOST`, `HA_SSH_PORT` and `HA_HOME` environment variables (`CORE_REMOTE` picks the git remote to look for the branch on). Authentication is left to the SSH agent, so the key must be loaded (`ssh-add -l`) before running the script.
-
-## Devcontainer changes
-
-`.devcontainer/devcontainer.json` is tracked upstream and modified here, committed on this branch so a rebuilt or freshly cloned container gets the setup without any manual step. The additions are:
-
-- `CLAUDE_CONFIG_DIR` pointing at `/home/vscode/.claude`, so `.claude.json` lands in the mounted volume and survives rebuilds
-- a read-only bind mount of `~/.aws`
-- a `claude-code-config-${devcontainerId}` volume for `/home/vscode/.claude`
-- the `anthropic.claude-code` extension
-
-Claude's Bedrock variables (`CLAUDE_CODE_USE_BEDROCK`, `AWS_REGION`, `AWS_PROFILE`) are deliberately not in this file; they live in `~/.claude/settings.json`, which persists in the `claude-code-config-*` volume across rebuilds.
-
-Feature branches must not inherit these edits, which is the other reason this branch is not a base for feature work.

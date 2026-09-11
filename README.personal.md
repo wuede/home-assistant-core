@@ -59,7 +59,19 @@ It adds the `netatmo.set_scheduled_room_temperature` action, which writes a room
 
 ### Installing
 
-Copy `homeassistant/components/netatmo` to `custom_components/netatmo` in the Home Assistant configuration directory. Custom integrations must declare a `version` in `manifest.json`, so add one (upstream manifests do not have it) before restarting Home Assistant.
+```sh
+script/personal/install-netatmo-custom.sh
+```
+
+The script picks the highest `feature/<tag>-netatmo-custom` branch on `origin`, fetches it without touching the working tree, extracts `homeassistant/components/netatmo` from that commit and copies it over SSH to `custom_components/netatmo` in the Home Assistant configuration directory. It prints what it is about to do and waits for confirmation.
+
+Custom integrations must declare a `version` in `manifest.json`, which upstream manifests do not have. The script inserts `<tag>+netatmo.<short sha>` (for example `2026.9.1+netatmo.21f10c2e9df`) so the Home Assistant logs and the integration page show which release the patch is based on and which commit produced it. AwesomeVersion parses this as SemVer with build metadata.
+
+Before overwriting, the existing directory is archived to `netatmo-backups/netatmo-<timestamp>.tar.gz` in the configuration directory — outside `custom_components`, so Home Assistant never tries to load it as an integration. To roll back, extract it back into `custom_components` and restart.
+
+The script refuses to install a branch whose `const.py` lacks `SERVICE_SET_SCHEDULED_ROOM_TEMPERATURE`, which catches a cherry-pick that silently dropped the patch.
+
+Useful options: `--branch` and `--version` to override the defaults, `--yes` to skip the prompt, `--restart` to run `ha core restart` afterwards (otherwise restart Home Assistant manually). The SSH target and the Home Assistant home directory default to the personal setup and can be overridden with the `HA_SSH_HOST`, `HA_SSH_PORT` and `HA_HOME` environment variables (`CORE_REMOTE` picks the git remote to look for the branch on). Authentication is left to the SSH agent, so the key must be loaded (`ssh-add -l`) before running the script.
 
 ## Local-only devcontainer changes
 

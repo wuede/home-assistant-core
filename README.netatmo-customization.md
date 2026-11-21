@@ -22,7 +22,7 @@ This updates the branch base while preserving the commits that belong to `netatm
 
 ## Netatmo custom component
 
-The Netatmo changes were rejected upstream, so they are deliberately not part of this branch — keeping them out avoids ever carrying them into an upstream pull request. They live on one branch per release tag, `feature/<tag>-netatmo-custom`, and are installed as a custom component. `latest-netatmo-custom` is a moving pointer to the newest of those branches, so it is always the commit to cherry-pick from. It currently points at `feature/2026.9.1-netatmo-custom` (commit `21f10c2e9df`, based on tag `2026.9.1`).
+The Netatmo changes were rejected upstream, so they are deliberately not part of this branch — keeping them out avoids ever carrying them into an upstream pull request. They live on one branch per release tag, `feature/<tag>-netatmo-custom`, and are installed as a custom component. `latest-netatmo-custom` is a moving pointer to the newest of those branches, so it is always the commit to cherry-pick from. It currently points at `feature/2026.11.2-netatmo-custom` (commit `c3beadcd5df`, based on tag `2026.11.2`).
 
 The pointer is never rebased onto `dev`: the patch is always applied to a release tag, which is behind `dev`, so keeping its context on the previous release minimises conflicts.
 
@@ -35,7 +35,7 @@ git checkout -b feature/<tag>-netatmo-custom <tag>
 git cherry-pick latest-netatmo-custom
 ```
 
-Conflicts are usually limited to the `from .const import (...)` block in `climate.py`; keep the added names and drop imports upstream has removed. Then verify:
+Conflicts usually show up in the `from .const import (...)` blocks of `climate.py` and `services.py`; keep the added names and drop imports upstream has removed. If upstream has changed the integration a lot, also check that the action is still registered the way the other netatmo actions are, and that the handler uses current entity attributes — mypy reports deprecated ones. If the release needs a newer Python than the venv has (the hassfest hooks fail with `No module named 'hassfest'`), run `script/setup` first. Then verify:
 
 ```sh
 uv run --no-sync prek run --files homeassistant/components/netatmo/*
@@ -54,7 +54,8 @@ git push --force-with-lease origin latest-netatmo-custom
 It adds the `netatmo.set_scheduled_room_temperature` action, which writes a room's target temperature into a named zone of the active Netatmo schedule:
 
 - `const.py`: `ATTR_ZONE_NAME` and `SERVICE_SET_SCHEDULED_ROOM_TEMPERATURE`. Do not add an `ATTR_TEMPERATURE` here — pylint rejects it as a duplicate of `homeassistant.const`; `climate.py` already imports that one.
-- `climate.py`: register the entity service in `async_setup_entry` (required `zone_name` string and `temperature` float) plus `NetatmoThermostat._async_service_set_scheduled_room_temperature`, which resolves the zone by name in `home.get_selected_schedule()`, calls `home.async_set_schedule_temperatures()` and writes the new setpoint into the entity state right away.
+- `services.py`: register the action in `async_setup_services` with `async_register_platform_entity_service` for the climate domain (required `zone_name` string and `temperature` float, `ATTR_TEMPERATURE` from `homeassistant.const`). Up to 2026.9.x it was registered in `async_setup_entry` in `climate.py`.
+- `climate.py`: `NetatmoThermostat._async_service_set_scheduled_room_temperature`, which resolves the zone by name in `home.get_selected_schedule()`, calls `home.async_set_schedule_temperatures()` and writes the new setpoint into `_attr_native_target_temperature` right away.
 - `services.yaml`: action targeting netatmo climate entities, `zone_name` as a select (Eco, Comfort, Comfort+, Night), `temperature` as a number between 10 and 30.
 - `strings.json`: action name and descriptions, plus the `temperature` and `zone_name` labels under `device_automation.trigger_subtype` that the fields reference via `[%key:…]`.
 - `icons.json`: `mdi:thermometer` for the new action.
@@ -67,7 +68,7 @@ script/personal/install-netatmo-custom.sh
 
 The script picks the highest `feature/<tag>-netatmo-custom` branch on `origin`, fetches it without touching the working tree, extracts `homeassistant/components/netatmo` from that commit and copies it over SSH to `custom_components/netatmo` in the Home Assistant configuration directory. It prints what it is about to do and waits for confirmation.
 
-Custom integrations must declare a `version` in `manifest.json`, which upstream manifests do not have. The script inserts `<tag>+netatmo.<short sha>` (for example `2026.9.1+netatmo.21f10c2e9df`) so the Home Assistant logs and the integration page show which release the patch is based on and which commit produced it. AwesomeVersion parses this as SemVer with build metadata.
+Custom integrations must declare a `version` in `manifest.json`, which upstream manifests do not have. The script inserts `<tag>+netatmo.<short sha>` (for example `2026.11.2+netatmo.c3beadcd5df`) so the Home Assistant logs and the integration page show which release the patch is based on and which commit produced it. AwesomeVersion parses this as SemVer with build metadata.
 
 Before overwriting, the existing directory is archived to `netatmo-backups/netatmo-<timestamp>.tar.gz` in the configuration directory — outside `custom_components`, so Home Assistant never tries to load it as an integration. To roll back, extract it back into `custom_components` and restart.
 
